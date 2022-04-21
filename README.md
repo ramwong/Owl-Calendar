@@ -6,7 +6,7 @@ Get some coin in test network: https://faucets.chain.link/
 
 # Run
 1. Get npm: https://nodejs.org/en/
-2. cd into folder "etimetable" which contains file "package.json"
+2. cd into extracted folder which contains file "package.json"
 3. npm install
 3. npm run dev
 
