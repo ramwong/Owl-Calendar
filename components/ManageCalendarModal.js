@@ -1,8 +1,7 @@
-import { Component, useRef } from 'react';
-import { Modal, Button, Input, Grid, Label, Divider, Form, Tab, Container, Table, Dropdown } from 'semantic-ui-react';
+import { Component } from 'react';
+import { Modal, Button, Input, Label, Divider, Form, Tab, Container, Table, Dropdown } from 'semantic-ui-react';
 import { createCalendar, leaveCalendar, addCalendar } from '../models/CalendarFactory';
-import { getCalendarInstance } from '../ethereum/instance'
-import { addCooperator, updateCooperator, deleteCooperator, updateCalendarName, changeManager } from '../models/Calendar';
+import { addCooperator, updateCooperator, deleteCooperator, updateCalendarTitle, changeManager } from '../models/Calendar';
 
 class ManageCalendarModal extends Component {
     state = {
@@ -74,7 +73,7 @@ class ManageCalendarModal extends Component {
     editCalendarName = async () => {
         if (this.state.editedCalendarName) {
             this.setState({ open: false });
-            const result = await updateCalendarName(this.state.selectedCalendar.address, this.state.editedCalendarName, this.props.getSelectedGroup().address);
+            const result = await updateCalendarTitle(this.state.selectedCalendar.address, this.state.editedCalendarName, this.props.getSelectedGroup().address);
             console.log(result);
             await this.props.refreshJoinedCalendars();
         }

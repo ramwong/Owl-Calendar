@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { Menu, Dropdown, Button } from 'semantic-ui-react';
+import { Menu, Dropdown } from 'semantic-ui-react';
 import ManageGroupModal from './ManageGroupModal';
 import ManageCalendarModal from './ManageCalendarModal';
 import { getMembers } from '../models/Group';

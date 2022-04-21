@@ -1,8 +1,7 @@
-import { Component, useRef } from 'react';
-import { Modal, Button, Input, Grid, Label, Divider, Form, Tab, Container, Table, Dropdown } from 'semantic-ui-react';
+import { Component, } from 'react';
+import { Modal, Button, Input, Label, Divider, Form, Tab, Container, Table, Dropdown } from 'semantic-ui-react';
 import { createGroup, deleteGroup, addGroup } from '../models/GroupFactory';
-import { getGroupInstance } from '../ethereum/instance'
-import { addMember, getMembers, updateMember, deleteMember, updateGroupName, changeManager } from '../models/Group';
+import { addMember, updateMember, deleteMember, updateGroupName, changeManager } from '../models/Group';
 
 class ManageGroupModal extends Component {
     state = {
@@ -88,7 +87,7 @@ class ManageGroupModal extends Component {
     }
     addNewMember = async () => {
         console.log(this.state.newMemberName);
-        console.log( this.state.newMemberAddress);
+        console.log(this.state.newMemberAddress);
         if (this.state.newMemberName && this.state.newMemberAddress) {
             await addMember(this.state.selectedGroup.address, this.state.newMemberAddress, this.state.newMemberName, this.state.newMemberPermission);
             await this.props.getSelectedGroupMembers();
@@ -216,7 +215,7 @@ class ManageGroupModal extends Component {
                                                     <Input name="memberName" defaultValue={member.name} />
                                                     <Dropdown style={{ marginLeft: "1em" }}
                                                         onChange={(event, data) => {
-                                                            const addressPermission ={};
+                                                            const addressPermission = {};
                                                             addressPermission[member.address] = data.value;
                                                             this.setState({
                                                                 editingPermission: { ...(this.state.editingPermission), ...(addressPermission) }
