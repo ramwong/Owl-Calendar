@@ -1,6 +1,7 @@
 # A blockchain e-timetable project
 ## It is now testing, please use Metamask and Rinkeby Test Network
 Metamask: https://metamask.io/
+
 Get some coin in test network: https://faucets.chain.link/
 
 # References
