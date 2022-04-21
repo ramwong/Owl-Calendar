@@ -1,5 +1,6 @@
 import web3 from '../ethereum/web3';
-import {groupFactory} from '../ethereum/factory';
+import Web3 from 'web3';
+import { groupFactory } from '../ethereum/factory';
 
 // helper function
 const getAccount = async () => {
@@ -14,7 +15,7 @@ export const createGroup = async (gname, mname, donateVolume) => {
         // get selected account
         const account = await getAccount();
         // change donateVolume from ether to wei
-        donateVolume = Web3.utils.toWei(donateVolume, 'ether');
+        donateVolume = Web3.utils.toWei("" + donateVolume, 'ether');
         // process create Group request
         try {
             await groupFactory.methods.createGroup(gname, mname)
@@ -64,20 +65,17 @@ export const addGroup = async (groupAddress) => {
 };
 
 
-export const leaveGroup = async (index) => {
+export const deleteGroup = async (index) => {
 
-    // check not null
-    if (index) {
-        // get selected account
-        const account = await getAccount();
-        // process leave Group request
-        try {
-            await groupFactory.methods.leaveGroup(index)
-                .send({ from: account });
-            return { status: true };    // if success, return true
-        } catch (ex) {
-            return { status: false, reason: ex };   //if not success, return false
-        }
+    // get selected account
+    const account = await getAccount();
+    // process leave Group request
+    try {
+        await groupFactory.methods.leaveGroup(index)
+            .send({ from: account });
+        return { status: true };    // if success, return true
+    } catch (ex) {
+        return { status: false, reason: ex };   //if not success, return false
     }
-    return { status: false, reason: "Something Empty" };   //if something missed, return false
+
 };

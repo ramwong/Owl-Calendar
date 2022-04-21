@@ -8,7 +8,7 @@ const groupFactory = require('./builds/GroupFactory.json');
 const buildPath = path.resolve(__dirname, "addresses");
 
 const provider = new HDWalletProvider(
-    'REPLACE_WITH_YOUR_MNEMONIC',
+    'impact wear banner laundry sell borrow dolphin hen pond burger wagon quit credit example speed naive venue civil village assist gown box tattoo found',
     "https://rinkeby.infura.io/v3/36d64c099c50404692eb8be07f68db77" // for testing 
     // "https://mainnet.infura.io/v3/36d64c099c50404692eb8be07f68db77"  // for production
 );

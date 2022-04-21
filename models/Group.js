@@ -1,4 +1,5 @@
-import web3 from '../ethereum/web3';
+import web3 from '../ethereum/web3'
+import { getGroupInstance } from '../ethereum/instance';
 
 // helper function
 const getAccount = async () => {
@@ -17,7 +18,6 @@ const getPermissionInt = (permissionString) => {
 
 
 export const addMember = async (group, memberAddress, name, permission) => {
-
     // check not null
     if (group && memberAddress && name && permission) {
         // get selected account
@@ -26,6 +26,7 @@ export const addMember = async (group, memberAddress, name, permission) => {
         permission = getPermissionInt(permission);
         // process add member request
         try {
+            group = getGroupInstance(group);
             await group.methods.addMember(memberAddress, name, permission)
                 .send({ from: account });
             return { status: true };    // if success, return true
@@ -38,20 +39,21 @@ export const addMember = async (group, memberAddress, name, permission) => {
 
 
 export const getMembers = async (group) => {
-
     // check not null
     if (group) {
         // get selected account
         const account = await getAccount();
         // process get members request
         try {
-            const result = await group.methods.getEvents()
+            group = getGroupInstance(group);
+            const result = await group.methods.getMembers()
                 .call({ from: account });
-            const permissions = result[1].map(permission => getPermissionString(permission));
+            const permissions = result[2].map(permission => getPermissionString(permission));
             return {
                 status: true,
                 result: {
-                    names: result[0],
+                    membersAddress: result[0],
+                    names: result[1],
                     permissions: permissions,
                 }
             };    // if success, return true
@@ -73,6 +75,7 @@ export const updateMember = async (group, memberAddress, name, permission) => {
         permission = getPermissionInt(permission);
         // process update member request
         try {
+            group = getGroupInstance(group);
             await group.methods.updateMember(memberAddress, name, permission)
                 .send({ from: account });
             return { status: true };    // if success, return true
@@ -86,20 +89,18 @@ export const updateMember = async (group, memberAddress, name, permission) => {
 
 export const deleteMember = async (group, index, memberAddress) => {
 
-    // check not null
-    if (group && index && memberAddress) {
-        // get selected account
-        const account = await getAccount();
-        // process remove member request
-        try {
-            await group.methods.deleteMember(index, memberAddress)
-                .send({ from: account });
-            return { status: true };    // if success, return true
-        } catch (ex) {
-            return { status: false, reason: ex };   //if not success, return false
-        }
+    // get selected account
+    const account = await getAccount();
+    // process remove member request
+    try {
+        group = getGroupInstance(group);
+        await group.methods.deleteMember(index, memberAddress)
+            .send({ from: account });
+        return { status: true };    // if success, return true
+    } catch (ex) {
+        return { status: false, reason: ex };   //if not success, return false
     }
-    return { status: false, reason: "Something Empty" };   //if something missed, return false
+
 };
 
 
@@ -111,6 +112,7 @@ export const getGroupName = async (group) => {
         const account = await getAccount();
         // process get group name request
         try {
+            group = getGroupInstance(group);
             const result = await group.methods.getGroupName()
                 .call({ from: account });
             return {
@@ -126,13 +128,13 @@ export const getGroupName = async (group) => {
 
 
 export const updateGroupName = async (group, name) => {
-
     // check not null
     if (group && name) {
         // get selected account
         const account = await getAccount();
         // process update group name request
         try {
+            group = getGroupInstance(group);
             await group.methods.updateGroupName(name)
                 .send({ from: account });
             return { status: true };    // if success, return true
@@ -152,6 +154,7 @@ export const changeManager = async (group, newManager) => {
         const account = await getAccount();
         // process change manager request
         try {
+            group = getGroupInstance(group);
             await group.methods.changeManager(newManager)
                 .send({ from: account });
             return { status: true };    // if success, return true

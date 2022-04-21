@@ -8,10 +8,8 @@ contract Calendar{
     struct Event{
         uint startTimestamp;
         uint endTimestamp;
-        string title;   // summary
-        string color;
+        string title;
         string description;
-        address createdBy;
     }
 
     // variables of a Calendar instance
@@ -63,16 +61,14 @@ contract Calendar{
     }
 
     // Create Event
-    function addEvent(uint monthTimestamp, uint eventStartTimestamp, uint eventEndTimestamp, string memory title, string memory color,
+    function addEvent(uint monthTimestamp, uint eventStartTimestamp, uint eventEndTimestamp, string memory title,
         string memory description, address[] memory cooperatorAddress) public editRestricted(cooperatorAddress){
         // construct a new event
         Event memory newEvent = Event({
             startTimestamp : eventStartTimestamp,
             endTimestamp: eventEndTimestamp,
             title : title,
-            color: color,
-            description: description,
-            createdBy: msg.sender
+            description: description
         });
 
         // save the new event 
@@ -82,18 +78,16 @@ contract Calendar{
     // Get Events
     function getEvents(uint monthTimestamp, address[] memory cooperatorAddress) public view viewRestricted(cooperatorAddress)
             returns(uint[] memory eventStartTimestamps, uint[] memory eventEndTimestamps, 
-            string[] memory titles, string[] memory colors, string[] memory descriptions, 
-            address[] memory createdBys, uint[] memory indexes) {
+            string[] memory titles, string[] memory descriptions, uint[] memory indexes) {
         // get events in provided month's timestamp
         Event[] memory eventsInProvidedMonthTimestamp = events[monthTimestamp];
 
         // init return variables
         uint size = eventsInProvidedMonthTimestamp.length;        
         eventStartTimestamps = new uint[](size);
+        eventEndTimestamps = new uint[](size);
         titles = new string[](size);
         descriptions = new string[](size);
-        colors = new string[](size);
-        createdBys = new address[](size);
         indexes = new uint[](size);
 
         // fill return variables
@@ -102,24 +96,20 @@ contract Calendar{
             eventEndTimestamps[i] = eventsInProvidedMonthTimestamp[i].endTimestamp;
             titles[i] = eventsInProvidedMonthTimestamp[i].title;
             descriptions[i] = eventsInProvidedMonthTimestamp[i].description;
-            colors[i] = eventsInProvidedMonthTimestamp[i].color;
-            createdBys[i] = eventsInProvidedMonthTimestamp[i].createdBy;
             indexes[i] = i;
         }
     }
 
     // Update Event
     function updateEvent(uint monthTimestamp, uint index, uint eventStartTimestamp, uint eventEndTimestamp, 
-        string memory title, string memory color, string memory description, 
+        string memory title, string memory description, 
         address[] memory cooperatorAddress) public editRestricted(cooperatorAddress){
         // create new event struct for replace existing once
         Event memory newEvent = Event({
             startTimestamp : eventStartTimestamp,
             endTimestamp: eventEndTimestamp,
             title : title,
-            color: color,
-            description: description,
-            createdBy: msg.sender
+            description: description
         });
 
         // update(replace) event
@@ -195,7 +185,7 @@ contract Calendar{
 
     // Update Cooperator information and permission
     function updateCooperator(address cooperator, string memory name, uint permission, address[] memory cooperatorAddress) public adminRestricted(cooperatorAddress){
-        if(cooperator != manager){
+        if(cooperator != manager || (Permission(permission)==Permission.ADMIN)){
             // Update cooperator information and permission
             cooperatorName[cooperator] = name;
             cooperatorPermission[cooperator] = Permission(permission);
@@ -292,6 +282,7 @@ contract Group{
     constructor(string memory gname, string memory mname, address _manager){
         manager = _manager;
         groupName = gname;
+        members.push(_manager);
         memberName[_manager] = mname;
         memberPermission[_manager] = Permission.ADMIN;
     }

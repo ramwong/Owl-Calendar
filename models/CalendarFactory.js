@@ -15,7 +15,7 @@ export const createCalendar = async (title, name, donateVolume) => {
         // get selected account
         const account = await getAccount();
         // change donateVolume from ether to wei
-        donateVolume = Web3.utils.toWei(donateVolume, 'ether');
+        donateVolume = Web3.utils.toWei(""+donateVolume, 'ether');
         // process create Calendar request
         try {
             await calendarFactory.methods.createCalendar(title, name)
@@ -67,8 +67,6 @@ export const addCalendar = async (calendarAddress) => {
 
 export const leaveCalendar = async (index) => {
 
-    // check not null
-    if (index) {
         // get selected account
         const account = await getAccount();
         // process leave calendar request
@@ -79,6 +77,5 @@ export const leaveCalendar = async (index) => {
         } catch (ex) {
             return { status: false, reason: ex };   //if not success, return false
         }
-    }
-    return { status: false, reason: "Something Empty" };   //if something missed, return false
+    
 };

@@ -1,59 +1,58 @@
 import { Component } from 'react';
-import { getCalendarInstance, getGroupInstance } from '../ethereum/instance';
 import Layout from '../components/Layout';
 import { getGroups } from '../models/GroupFactory';
 import { getGroupName } from '../models/Group';
 import { getCalendars } from '../models/CalendarFactory';
 import { getCalendarTitle, getEvents } from '../models/Calendar';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import Body from '../components/Body';
+import { Segment } from 'semantic-ui-react';
 
 
 class CalendarIndex extends Component {
 
     // default state
     state = {
-        selectedGroup: { name: "Select Group", address: "", },
-        selectedCalendar: { title: "Select Calendar", address: "", },
-        joinedGroups: [{ text: "loading", value: { name: "loading", address: "" }, disable: true }],
-        joinedCalendars: [{ text: "loading", value: { title: "loading", address: "" }, disable: true }],
+        selectedGroup: { name: "Select Group", address: "", index: 0 },
+        selectedCalendar: { title: "Select Calendar", address: "", index: 0 },
+        joinedGroups: [{ text: "loading", value: { index: 0, name: "loading", address: "" } }],
+        joinedCalendars: [{ text: "loading", value: { title: "loading", address: "" } }],
         donateVolume: 0,
-        events: {
-            /* 'dd-MM-yyyy': [ //new Date().getDate(), getMonth()+1, getFullYear()
-                {
-                    id: index,
-                    startAt: new Date(eventStartTimestamp).toISOString(),
-                    endAt: new Date(eventEndTimestamp).toISOString(),
-                    summary: description,
-                    color: color
-                }
-            ] */
-        },
+        events: [
+            /*{
+                id: 2,
+                title: 'DTS STARTS',
+                start: new Date(2016, 2, 13, 0, 0, 0),
+                end: new Date(2016, 2, 20, 0, 0, 0),
+                description: '',
+            }*/
+        ],
         getGroupsError: { message: "", error: false },
         getCalendarsError: { message: "", error: false },
         getEventsError: { message: "", error: false },
         loading: true,
+        update: true
     }
 
-    setSelectedGroup = async (name, address) => {
-        await refreshJoinedCalendars();
+    setSelectedGroup = async (name, address, index) => {
+        await this.refreshJoinedCalendars();
         this.setState({
-            selectedGroup: { name: name, address: address },
+            selectedGroup: { name: name, address: address, index: index },
             selectedCalendar: { title: "Select Calendar", address: "", }
         });
     }
 
-    setselectedCalendar = async (title, address) => {
-        //refreshEvents
+    setSelectedCalendar = async (title, address, index) => {
         const today = new Date();
         const yyyy = today.getFullYear();
-        const MM = today.getMonth() + 1;
-        const dd = today.getDate();
-        const dateString = `${MM}/${dd}/${yyyy}`;
-        const monthTimestamp = new Date(dateString).getTime();
-        await refreshEvents(monthTimestamp);
-        this.setState({ selectedCalendar: { title: title, address: address } });
+        const MM = today.getMonth();
+        const monthTimestamp = +new Date(yyyy, MM, 1);
+        await this.setState({ selectedCalendar: { title: title, address: address, index: index } });
+        await this.refreshEvents(monthTimestamp);
     }
 
-    refreshJoinedgroups = async () => {
+    refreshJoinedGroups = async () => {
         // refresh the error message
         this.setState({ getGroupsError: { message: "", error: false }, loading: true })
         // get joined groups' address
@@ -61,18 +60,18 @@ class CalendarIndex extends Component {
         if (getGroupsResult.status) {
             const joinedGroupsAddress = getGroupsResult.result.joinedGroups;
             // get joined groups' name
-            const joinedGroups = [];
-            for (const address of joinedGroupsAddress) {
+            const tempJoinedGroups = [];
+            for (let i = 0; i < joinedGroupsAddress.length; i++) {
+                const address = joinedGroupsAddress[i];
                 // get group instance
-                const group = getGroupInstance(address);
-                const getGroupNameResult = await getGroupName(group);
+                const getGroupNameResult = await getGroupName(address);
                 if (getGroupNameResult.status) {
                     const groupName = getGroupNameResult.result.groupName;
-                    joinedGroups.push({ text: groupName, value: { name: groupName, address: address } });
+                    tempJoinedGroups.push({ text: groupName, value: { name: groupName, address: address, index: i } });
                 }
             }
-            if (joinedGroups) {
-                this.setState({ joinedGroups: joinedGroups, loading: false });
+            if (tempJoinedGroups) {
+                this.setState({ joinedGroups: tempJoinedGroups, loading: false });
             } else {
                 this.setState({ getGroupsError: { message: "Cannot get groups' name", error: true } });
             }
@@ -91,9 +90,7 @@ class CalendarIndex extends Component {
             // get joined calendars' name
             const joinedCalendars = [];
             for (const address of joinedCalendarsAddress) {
-                // get calendar instance
-                const calendar = getCalendarInstance(address);
-                const getCalendarNameResult = await getCalendarTitle(calendar, this.state.selectedGroup.address);
+                const getCalendarNameResult = await getCalendarTitle(address, this.state.selectedGroup.address);
                 if (getCalendarNameResult.status) {
                     const calendarTitle = getCalendarNameResult.result.calendarTitle;
                     joinedCalendars.push({ text: calendarTitle, value: { title: calendarTitle, address: address } });
@@ -109,30 +106,77 @@ class CalendarIndex extends Component {
         }
     }
 
-    setDonateVolume(volume) {
+    setDonateVolume = (volume) => {
         this.setState({ donateVolume: volume });
     }
 
     refreshEvents = async (monthTimestamp) => {
         // refresh the error message
         this.setState({ getGroupsError: { message: "", error: false }, loading: true })
-        // get calendar instance
-        const calendar = getCalendarInstance(this.state.selectedCalendar.address);
         // get Events
-        const getEventsResult = await getEvents(calendar, this.state.selectedGroup.address);
-        if (getCalendarNameResult.status) {
+        const getEventsResult = await getEvents(this.state.selectedCalendar.address, monthTimestamp, this.state.selectedGroup.address);
+        
+        if (getEventsResult.status) {
             const { eventStartTimestamps, eventEndTimestamps, titles,
-                descriptions, colors, createdBys, indexes, } = getCalendarNameResult.result;
+                descriptions, indexes, } = getEventsResult.result;
+            const tempEvents = [];
+            for (let i = 0; i < indexes.length; i++) {
+                tempEvents.push({
+                    id: indexes[i], title: titles[i], start: new Date(+eventStartTimestamps[i]),
+                    end: new Date(+eventEndTimestamps[i]), description: descriptions[i]
+                });
+            }
+            console.log(tempEvents);
+            this.setState({ events: tempEvents, update:!this.state.update });
         }
     }
 
-    render() {
+    getEvents = () => {
+        return this.state.events;
+    }
+
+    getSelectedGroup = () => {
+        return this.state.selectedGroup;
+    }
+    getSelectedCalendar = () => {
+        return this.state.selectedCalendar;
+    }
+    getJoinedGroups = () => {
+        return this.state.joinedGroups;
+    }
+    getJoinedCalendars = () => {
+        return this.state.joinedCalendars;
+    }
+    getDonateVolume = () => {
+        return this.state.donateVolume;
+    }
+    render = () => {
         return (
-            <Layout state>
-                <div>
-                    loading
-                </div>
-            </Layout>
+            <Layout>
+                <Header
+                    setSelectedGroup={this.setSelectedGroup}
+                    getSelectedGroup={this.getSelectedGroup}
+                    setSelectedCalendar={this.setSelectedCalendar}
+                    getSelectedCalendar={this.getSelectedCalendar}
+                    getJoinedGroups={this.getJoinedGroups}
+                    getJoinedCalendars={this.getJoinedCalendars}
+                    refreshJoinedGroups={this.refreshJoinedGroups}
+                    refreshJoinedCalendars={this.refreshJoinedCalendars}
+                    getDonateVolume={this.getDonateVolume}
+                />
+                <Body
+                    key={this.state.update}
+                    getSelectedGroup={this.getSelectedGroup}
+                    getSelectedCalendar={this.getSelectedCalendar}
+                    getEvents={this.getEvents}
+                    refreshEvents={this.refreshEvents}
+                />
+                <Segment style={{ "verticalAlign": "middle" }}>
+                    <Footer floated='bottom'
+                        setDonateVolume={this.setDonateVolume}
+                    />
+                </Segment>
+            </Layout >
         );
     }
 }

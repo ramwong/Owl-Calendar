@@ -1,11 +1,12 @@
 import web3 from '../ethereum/web3';
+import { getCalendarInstance } from '../ethereum/instance';
 
 // helper function
 const getAccount = async () => {
     return (await web3.eth.getAccounts())[0];
 }
 
-const createCooperatorAddress = (selectedGroupAddress) => {
+const createCooperatorAddress = (selectedGroupAddress, account) => {
     const cooperatorAddress = [];
     if (selectedGroupAddress) {
         cooperatorAddress.push(selectedGroupAddress);
@@ -26,18 +27,18 @@ const getPermissionInt = (permissionString) => {
 
 
 export const addEvent = async (calendar, monthTimestamp, eventStartTimestamp, eventEndTimestamp,
-    title, color, description, selectedGroupAddress) => {
-
+    title, description, selectedGroupAddress) => {
     // check not null
-    if (calendar && monthTimestamp && eventStartTimestamp && eventEndTimestamp && title && color && description) {
+    if (calendar && monthTimestamp && eventStartTimestamp && eventEndTimestamp && title && description) {
         // get selected account
         const account = await getAccount();
         // create cooperatorAddress
-        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress);
+        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress, account);
         // process add event request
         try {
-            await calendar.methods.addEvent(monthTimestamp, eventStartTimestamp, eventEndTimestamp,
-                title, color, description, cooperatorAddress)
+            calendar = getCalendarInstance(calendar);
+            const result = await calendar.methods.addEvent(monthTimestamp, eventStartTimestamp, eventEndTimestamp,
+                title, description, cooperatorAddress)
                 .send({ from: account });
             return { status: true };    // if success, return true
         } catch (ex) {
@@ -49,15 +50,15 @@ export const addEvent = async (calendar, monthTimestamp, eventStartTimestamp, ev
 
 
 export const getEvents = async (calendar, monthTimestamp, selectedGroupAddress) => {
-
     // check not null
     if (calendar && monthTimestamp) {
         // get selected account
         const account = await getAccount();
         // create cooperatorAddress
-        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress);
+        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress, account);
         // process get events request
         try {
+            calendar = getCalendarInstance(calendar);
             const result = await calendar.methods.getEvents(monthTimestamp, cooperatorAddress)
                 .call({ from: account });
             return {
@@ -67,9 +68,7 @@ export const getEvents = async (calendar, monthTimestamp, selectedGroupAddress) 
                     eventEndTimestamps: result[1],
                     titles: result[2],
                     descriptions: result[3],
-                    colors: result[4],
-                    createdBys: result[5],
-                    indexes: result[6],
+                    indexes: result[4],
                 }
             };    // if success, return true
         } catch (ex) {
@@ -82,18 +81,20 @@ export const getEvents = async (calendar, monthTimestamp, selectedGroupAddress) 
 
 
 export const updateEvent = async (calendar, monthTimestamp, index, eventStartTimestamp, eventEndTimestamp,
-    title, color, description, selectedGroupAddress) => {
-
+    title, description, selectedGroupAddress) => {
+    console.log(calendar, monthTimestamp, index, eventStartTimestamp, eventEndTimestamp,
+        title, description, selectedGroupAddress);
     // check not null
-    if (calendar && monthTimestamp && index && eventStartTimestamp && eventEndTimestamp && title && color && description) {
+    if (calendar && monthTimestamp && eventStartTimestamp && eventEndTimestamp && title && description) {
         // get selected account
         const account = await getAccount();
         // create cooperatorAddress
-        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress);
+        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress, account);
         // process add event request
         try {
+            calendar = getCalendarInstance(calendar);
             await calendar.methods.updateEvent(monthTimestamp, index, eventStartTimestamp, eventEndTimestamp,
-                title, color, description, cooperatorAddress)
+                title, description, cooperatorAddress)
                 .send({ from: account });
             return { status: true };    // if success, return true
         } catch (ex) {
@@ -106,36 +107,34 @@ export const updateEvent = async (calendar, monthTimestamp, index, eventStartTim
 
 export const deleteEvent = async (calendar, monthTimestamp, index, selectedGroupAddress) => {
 
-    // check not null
-    if (calendar && monthTimestamp && index) {
-        // get selected account
-        const account = await getAccount();
-        // create cooperatorAddress
-        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress);
-        // process delete event request
-        try {
-            await calendar.methods.deleteEvent(monthTimestamp, index, cooperatorAddress)
-                .send({ from: account });
-            return { status: true };    // if success, return true
-        } catch (ex) {
-            return { status: false, reason: ex };   //if not success, return false
-        }
+    // get selected account
+    const account = await getAccount();
+    // create cooperatorAddress
+    const cooperatorAddress = createCooperatorAddress(selectedGroupAddress, account);
+    // process delete event request
+    try {
+        calendar = getCalendarInstance(calendar);
+        await calendar.methods.deleteEvent(monthTimestamp, index, cooperatorAddress)
+            .send({ from: account });
+        return { status: true };    // if success, return true
+    } catch (ex) {
+        return { status: false, reason: ex };   //if not success, return false
     }
-    return { status: false, reason: "Something Empty" };   //if something missed, return false
+
 };
 
 
 
 export const getCalendarTitle = async (calendar, selectedGroupAddress) => {
-
     // check not null
     if (calendar) {
         // get selected account
         const account = await getAccount();
         // create cooperatorAddress
-        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress);
+        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress, account);
         // process get Calendar Title request
         try {
+            calendar = getCalendarInstance(calendar);
             const result = await calendar.methods.getCalendarTitle(cooperatorAddress)
                 .call({ from: account });
             return {
@@ -158,9 +157,10 @@ export const updateCalendarTitle = async (calendar, title, selectedGroupAddress)
         // get selected account
         const account = await getAccount();
         // create cooperatorAddress
-        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress);
+        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress, account);
         // process update Calendar Title request
         try {
+            calendar = getCalendarInstance(calendar);
             await calendar.methods.updateCalendarTitle(title, cooperatorAddress)
                 .send({ from: account });
             return { status: true };    // if success, return true
@@ -180,6 +180,7 @@ export const changeManager = async (calendar, newManager) => {
         const account = await getAccount();
         // process change Manager request
         try {
+            calendar = getCalendarInstance(calendar);
             await calendar.methods.changeManager(newManager)
                 .send({ from: account });
             return { status: true };    // if success, return true
@@ -198,11 +199,12 @@ export const addCooperator = async (calendar, cooperator, permission, name, sele
         // get selected account
         const account = await getAccount();
         // create cooperatorAddress
-        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress);
+        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress, account);
         // change permission to number
         permission = getPermissionInt(permission);
         // process add cooperator request
         try {
+            calendar = getCalendarInstance(calendar);
             await calendar.methods.addCooperator(cooperator, permission, name, cooperatorAddress)
                 .send({ from: account });
             return { status: true };    // if success, return true
@@ -221,17 +223,19 @@ export const getCooperators = async (calendar, selectedGroupAddress) => {
         // get selected account
         const account = await getAccount();
         // create cooperatorAddress
-        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress);
+        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress, account);
         // process get cooperators request
         try {
+            calendar = getCalendarInstance(calendar);
             const result = await calendar.methods.getCooperators(cooperatorAddress)
                 .call({ from: account });
-            const permissions = result[1].map(permission => getPermissionString(permission));
+            const permissions = result[2].map(permission => getPermissionString(permission));
 
             return {
                 status: true,
                 result: {
-                    names: result[0],
+                    cooperatorsAddress: result[0],
+                    names: result[1],
                     permissions: permissions
                 }
             };    // if success, return true
@@ -245,22 +249,19 @@ export const getCooperators = async (calendar, selectedGroupAddress) => {
 
 export const deleteCooperator = async (calendar, index, cooperator, selectedGroupAddress) => {
 
-    // check not null
-    if (calendar && index && cooperator) {
-        // get selected account
-        const account = await getAccount();
-        // create cooperatorAddress
-        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress);
-        // process remove cooperator request
-        try {
-            await calendar.methods.deleteCooperator(index, cooperator, cooperatorAddress)
-                .send({ from: account });
-            return { status: true };    // if success, return true
-        } catch (ex) {
-            return { status: false, reason: ex };   //if not success, return false
-        }
+    // get selected account
+    const account = await getAccount();
+    // create cooperatorAddress
+    const cooperatorAddress = createCooperatorAddress(selectedGroupAddress, account);
+    // process remove cooperator request
+    try {
+        calendar = getCalendarInstance(calendar);
+        await calendar.methods.deleteCooperator(index, cooperator, cooperatorAddress)
+            .send({ from: account });
+        return { status: true };    // if success, return true
+    } catch (ex) {
+        return { status: false, reason: ex };   //if not success, return false
     }
-    return { status: false, reason: "Something Empty" };   //if something missed, return false
 };
 
 
@@ -271,11 +272,12 @@ export const updateCooperator = async (calendar, cooperator, name, permission, s
         // get selected account
         const account = await getAccount();
         // create cooperatorAddress
-        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress);
+        const cooperatorAddress = createCooperatorAddress(selectedGroupAddress, account);
         // change permission to number
         permission = getPermissionInt(permission);
         // process update cooperator request
         try {
+            calendar = getCalendarInstance(calendar);
             await calendar.methods.updateCooperator(cooperator, name, permission, cooperatorAddress)
                 .send({ from: account });
             return { status: true };    // if success, return true
