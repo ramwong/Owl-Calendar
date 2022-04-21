@@ -1,6 +1,6 @@
 import web3 from "./web3";
-import Calendar from "./builds/Calendar.json";
-import Group from "./builds/Group.json";
+import Calendar from "./build/Calendar.json";
+import Group from "./build/Group.json";
 
 export const getCalendarInstance = (address) => {
   return new web3.eth.Contract(Calendar.abi, address);
