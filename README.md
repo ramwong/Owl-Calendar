@@ -8,7 +8,20 @@ Get some coin in test network: https://faucets.chain.link/
 1. Get npm: https://nodejs.org/en/
 2. cd into extracted folder which contains file "package.json"
 3. npm install
-3. npm run dev
+4. npm run dev
+
+# If you want to deploy your own
+1. update ./ethereum/deploy.js
+```
+const provider = new HDWalletProvider(
+    'REPLACE_WITH_MNEMONIC',
+    "https://rinkeby.infura.io/v3/36d64c099c50404692eb8be07f68db77" // for testing 
+    // "https://mainnet.infura.io/v3/36d64c099c50404692eb8be07f68db77"  // for production
+);
+```
+2. if you updated the contracts source file (./ethereum/contracts/E-timetable.sol), run `npm run compile`
+3. `npm run deploy`
+
 
 # References
 UI component:
