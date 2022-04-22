@@ -2,8 +2,8 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 const Web3 = require('web3');
 const path = require("path");
 const fs = require("fs-extra");
-const calendarFactory = require('./builds/CalendarFactory.json');
-const groupFactory = require('./builds/GroupFactory.json');
+const calendarFactory = require('./build/CalendarFactory.json');
+const groupFactory = require('./build/GroupFactory.json');
 
 const buildPath = path.resolve(__dirname, "addresses");
 
