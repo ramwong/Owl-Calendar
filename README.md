@@ -23,6 +23,16 @@ const provider = new HDWalletProvider(
 `npm run compile`
 3. `npm run deploy`
 
+# How to use
+Use Calendar:
+1. Click create "Manager Calendar"
+2. create a new Calendar or join a existing Calendar
+3. After transaction complete, refresh the page
+4. select joined calednar
+5. click on the date you want to add event
+6. fill and click create button
+
+
 
 # References
 UI component:
