@@ -124,7 +124,6 @@ class Body extends Component {
         const monthTimestamp = +new Date(YYYY, MM, 1);
         await this.props.refreshEvents(monthTimestamp);
         this.setState({ events: this.props.getEvents(), currentDate: new Date(monthTimestamp) });
-        console.log(this.state.currentDate);
     }
 
     render = () => {
