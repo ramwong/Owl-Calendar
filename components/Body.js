@@ -21,6 +21,28 @@ class Body extends Component {
         selectedEventDescription: "",
         selectedEventId: 0,
         isManageEventModalOpen: false,
+        loading: false,
+    }
+
+    doLoading = async (func) => {
+
+        if (this.props.getSelectedCalendar().address === ''){
+            window.alert('please select a calendar first')
+        }
+
+        this.setState({ loading: true });
+        try {
+            const res = await func()
+            if (res?.status ?? true) {
+                window.alert('Transaction Success')
+            }else{
+                window.alert('Transaction Failed')
+            }
+        } catch (err) {
+            window.alert('Transaction Failed: ' + err?.message ?? err)
+        } finally {
+            this.setState({ loading: false });
+        }
 
     }
 
@@ -51,38 +73,47 @@ class Body extends Component {
     }
 
     createNewEvent = async () => {
-        const MM = this.state.newEventStart.getMonth();
-        const YYYY = this.state.newEventStart.getFullYear();
-        const monthTimestamp = +new Date(YYYY, MM, 1);
-        const result = await addEvent(this.props.getSelectedCalendar().address, monthTimestamp,
-            +this.state.newEventStart, +this.state.newEventEnd, this.state.newEventTitle,
-            this.state.newEventDescription, this.props.getSelectedGroup().address);
-        await this.props.refreshEvents(monthTimestamp);
-        this.setState({ events: this.props.getEvents(), isManageEventModalOpen: false });
+        await this.doLoading(async () => {
+            const MM = this.state.newEventStart.getMonth();
+            const YYYY = this.state.newEventStart.getFullYear();
+            const monthTimestamp = +new Date(YYYY, MM, 1);
+            const result = await addEvent(this.props.getSelectedCalendar().address, monthTimestamp,
+                +this.state.newEventStart, +this.state.newEventEnd, this.state.newEventTitle,
+                this.state.newEventDescription, this.props.getSelectedGroup().address);
+            await this.props.refreshEvents(monthTimestamp);
+            this.setState({ events: this.props.getEvents(), isManageEventModalOpen: false });
+            return result
+        })
     }
     componentDidMount = async () => {
         await this.setState({ events: this.props.getEvents(), })
     }
 
     updateSelectedEvent = async () => {
-        const MM = this.state.selectedEventStart.getMonth();
-        const YYYY = this.state.selectedEventStart.getFullYear();
-        const monthTimestamp = +new Date(YYYY, MM, 1);
-        const result = await updateEvent(this.props.getSelectedCalendar().address, monthTimestamp, this.state.selectedEventId,
-            +this.state.selectedEventStart, +this.state.selectedEventEnd,
-            this.state.selectedEventTitle, this.state.selectedEventDescription, this.props.getSelectedGroup().address);
-        await this.props.refreshEvents(monthTimestamp);
-        this.setState({ events: this.props.getEvents(), isManageEventModalOpen: false });
+        await this.doLoading(async () => {
+            const MM = this.state.selectedEventStart.getMonth();
+            const YYYY = this.state.selectedEventStart.getFullYear();
+            const monthTimestamp = +new Date(YYYY, MM, 1);
+            const result = await updateEvent(this.props.getSelectedCalendar().address, monthTimestamp, this.state.selectedEventId,
+                +this.state.selectedEventStart, +this.state.selectedEventEnd,
+                this.state.selectedEventTitle, this.state.selectedEventDescription, this.props.getSelectedGroup().address);
+            await this.props.refreshEvents(monthTimestamp);
+            this.setState({ events: this.props.getEvents(), isManageEventModalOpen: false });
+            return result
+        })
     }
 
     removeSelectedEvent = async () => {
-        const MM = this.state.selectedEventStart.getMonth();
-        const YYYY = this.state.selectedEventStart.getFullYear();
-        const monthTimestamp = +new Date(YYYY, MM, 1);
-        const result = await deleteEvent(this.props.getSelectedCalendar().address, monthTimestamp,
-            this.state.selectedEventId, this.props.getSelectedGroup.address);
-        await this.props.refreshEvents(monthTimestamp);
-        this.setState({ events: this.props.getEvents(), isManageEventModalOpen: false });
+        await this.doLoading(async () => {
+            const MM = this.state.selectedEventStart.getMonth();
+            const YYYY = this.state.selectedEventStart.getFullYear();
+            const monthTimestamp = +new Date(YYYY, MM, 1);
+            const result = await deleteEvent(this.props.getSelectedCalendar().address, monthTimestamp,
+                this.state.selectedEventId, this.props.getSelectedGroup.address);
+            await this.props.refreshEvents(monthTimestamp);
+            this.setState({ events: this.props.getEvents(), isManageEventModalOpen: false });
+            return result
+        })
     }
 
     render = () => {
@@ -120,7 +151,7 @@ class Body extends Component {
                             <Label size="large" style={{ marginTop: "1em" }}>Description</Label><br />
                             <TextArea onChange={(event) => { this.setState({ newEventDescription: event.target.value }) }} />
                             <br />
-                            <Button onClick={this.createNewEvent}>
+                            <Button onClick={this.createNewEvent} loading={this.state.loading} disabled={this.state.loading}>
                                 Create
                             </Button>
                         </Container>
@@ -149,10 +180,10 @@ class Body extends Component {
                             <Label size="large" style={{ marginTop: "1em" }}>Description</Label><br />
                             <TextArea onChange={(event) => { this.setState({ selectedEventDescription: event.target.value }) }} value={this.state.selectedEventDescription} />
                             <br />
-                            <Button onClick={this.updateSelectedEvent}>
+                            <Button onClick={this.updateSelectedEvent}  loading={this.state.loading} disabled={this.state.loading}>
                                 Update
                             </Button>
-                            <Button onClick={this.removeSelectedEvent}>
+                            <Button onClick={this.removeSelectedEvent}  loading={this.state.loading} disabled={this.state.loading}>
                                 Remove
                             </Button>
                         </Container>

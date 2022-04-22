@@ -15,6 +15,19 @@ class Header extends Component {
         calendarOptions: [],
         selectedGroupMembers: [],
         selectedCalendarCooperators: [],
+        loading: false,
+    }
+
+    doLoading = async (func) => {
+        this.setState({ loading: true });
+        try {
+            await func()
+        } catch (err) {
+            window.alert('Loading Failed: ' + err?.message ?? err)
+        } finally {
+            this.setState({ loading: false });
+        }
+
     }
 
     refreshState = async () => {
@@ -67,28 +80,32 @@ class Header extends Component {
     }
 
     handleSelectGroup = async (event, data) => {
-        const selectedGroupName = data.value;
-        for (let group of this.state.joinedGroups) {
-            if (group.text == selectedGroupName) {
-                await this.props.setSelectedGroup(selectedGroupName, group.value.address, group.value.index);
-                break;
+        await this.doLoading(async () => {
+            const selectedGroupName = data.value;
+            for (let group of this.state.joinedGroups) {
+                if (group.text == selectedGroupName) {
+                    await this.props.setSelectedGroup(selectedGroupName, group.value.address, group.value.index);
+                    break;
+                }
             }
-        }
-        await this.refreshState();
-        await this.requestSelectedGroupMembers();
+            await this.refreshState();
+            await this.requestSelectedGroupMembers();
+        })
     }
 
     handleSelectCalendar = async (event, data) => {
-        const selectedCalendarTitle = data.value;
-        for(let i =0;i<this.state.joinedCalendars.length;i++){
-            const calendar = this.state.joinedCalendars[i];
-            if (calendar.value.title == selectedCalendarTitle) {
-                await this.props.setSelectedCalendar(selectedCalendarTitle, calendar.value.address, i);
-                break;
+        await this.doLoading(async () => {
+            const selectedCalendarTitle = data.value;
+            for (let i = 0; i < this.state.joinedCalendars.length; i++) {
+                const calendar = this.state.joinedCalendars[i];
+                if (calendar.value.title == selectedCalendarTitle) {
+                    await this.props.setSelectedCalendar(selectedCalendarTitle, calendar.value.address, i);
+                    break;
+                }
             }
-        }
-        await this.refreshState();
-        await this.requestSelectedCalendarCooperator();
+            await this.refreshState();
+            await this.requestSelectedCalendarCooperator();
+        })
     }
 
     getGroupsOptions = () => {
@@ -101,7 +118,7 @@ class Header extends Component {
             calendarOptions: this.state.joinedCalendars.map(data => { return { text: data.text, value: data.value.title } })
         });
     }
-    
+
     render = () => {
         return (
             <Menu stackable style={{ 'marginTop': '0.5em' }}>
@@ -110,12 +127,12 @@ class Header extends Component {
                 </Menu.Item>
                 <Menu.Menu position="right">
                     <Menu.Item>
-                        <Dropdown scrolling id="groupDropdown" text={this.state.selectedGroup.name}
+                        <Dropdown scrolling id="groupDropdown" text={this.state.selectedGroup.name} loading={this.state.loading}
                             options={this.state.groupsOptions} onChange={this.handleSelectGroup}>
                         </Dropdown>
                     </Menu.Item>
                     <Menu.Item>
-                        <Dropdown scrolling id="calendarDropdown" text={this.state.selectedCalendar.title}
+                        <Dropdown scrolling id="calendarDropdown" text={this.state.selectedCalendar.title} loading={this.state.loading}
                             options={this.state.calendarOptions} onChange={this.handleSelectCalendar}>
                         </Dropdown>
                     </Menu.Item>

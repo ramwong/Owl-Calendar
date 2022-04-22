@@ -17,6 +17,22 @@ class ManageGroupModal extends Component {
         joinedGroupMembers: this.props.getSelectedGroupMembers(),
         editingPermission: {},
         newMemberPermission: "View",
+        loading: false,
+    }
+
+    doLoading = async (func) => {
+        this.setState({ loading: true });
+        try {
+            await func()
+            window.alert('Transaction Success, refreshing the web page')
+            location.reload()
+        }catch(err){
+            window.alert('Transaction Failed: '+err?.message ?? err)
+        }finally{
+            this.setState({ loading: false });
+        }
+        
+        
     }
 
     refreshState = async () => {
@@ -59,61 +75,78 @@ class ManageGroupModal extends Component {
     createNewGroup = async () => {
         //console.log("123" + this.props.donateVolume);
         if (this.state.newGroupName && this.state.newGroupManagerName) {
-            this.setState({ open: false });
-            await createGroup(this.state.newGroupName, this.state.newGroupManagerName, this.props.getDonateVolume() || 0);
-            await this.props.refreshJoinedGroups();
+            await this.doLoading(async () => {
+                await createGroup(this.state.newGroupName, this.state.newGroupManagerName, this.props.getDonateVolume() || 0);
+                await this.props.refreshJoinedGroups();
+                this.setState({ open: false });
+            })
         }
     }
     joinGroup = async () => {
         if (this.state.groupAddressToJoin) {
-            this.setState({ open: false });
-            await addGroup(this.state.groupAddressToJoin);
-            await this.props.refreshJoinedGroups();
+
+            await this.doLoading(async () => {
+                await addGroup(this.state.groupAddressToJoin);
+                await this.props.refreshJoinedGroups();
+                this.setState({ open: false });
+            })
         }
     }
     editGroupName = async () => {
         if (this.state.editedGroupName) {
-            this.setState({ open: false });
-            const result = await updateGroupName(this.state.selectedGroup.address, this.state.editedGroupName);
-            console.log(result);
-            await this.props.refreshJoinedGroups();
+            await this.doLoading(async () => {
+                const result = await updateGroupName(this.state.selectedGroup.address, this.state.editedGroupName);
+                console.log(result);
+                await this.props.refreshJoinedGroups();
+                this.setState({ open: false });
+            })
         }
     }
     leaveGroup = async () => {
-        this.setState({ open: false });
-        const result = await deleteGroup(this.state.selectedGroup.index);
-        await this.props.refreshJoinedGroups();
+        await this.doLoading(async () => {
+            const result = await deleteGroup(this.state.selectedGroup.index);
+            await this.props.refreshJoinedGroups();
+            this.setState({ open: false });
+        })
     }
     addNewMember = async () => {
         console.log(this.state.newMemberName);
         console.log(this.state.newMemberAddress);
         if (this.state.newMemberName && this.state.newMemberAddress) {
-            await addMember(this.state.selectedGroup.address, this.state.newMemberAddress, this.state.newMemberName, this.state.newMemberPermission);
-            await this.props.getSelectedGroupMembers();
+            await this.doLoading(async () => {
+                await addMember(this.state.selectedGroup.address, this.state.newMemberAddress, this.state.newMemberName, this.state.newMemberPermission);
+                await this.props.getSelectedGroupMembers();
+            })
         }
+
     }
+
     updateMemberName = async (event, address) => {
         const newName = event.target.memberName.value;
         const newPermission = this.state.editingPermission[address];
         console.log(newName);
         console.log(this.state.editingPermission);
         if (newName && newPermission) {
-            await updateMember(this.state.selectedGroup.address, address, newName, newPermission);
-            await this.props.getSelectedGroupMembers();
+            await this.doLoading(async () => {
+                await updateMember(this.state.selectedGroup.address, address, newName, newPermission);
+                await this.props.getSelectedGroupMembers();
+            })
         }
     }
     removeMember = async (i, address) => {
-        await deleteMember(this.state.selectedGroup.address, i, address);
-        await this.props.getSelectedGroupMembers();
+        await this.doLoading(async () => {
+            await deleteMember(this.state.selectedGroup.address, i, address);
+            await this.props.getSelectedGroupMembers();
+        })
     }
 
     transferManager = async (address) => {
-        await changeManager(this.state.selectedGroup.address, address);
+        await this.doLoading(async () => await changeManager(this.state.selectedGroup.address, address))
     }
 
     componentDidMount = async () => {
         if (this.state.selectedGroup.name != "Select Group") {
-            await this.props.getSelectedGroupMembers()
+            await this.doLoading(async () => await this.props.getSelectedGroupMembers())
         }
     }
 
@@ -131,7 +164,7 @@ class ManageGroupModal extends Component {
                             <Input placeholder='Your identity' onChange={this.setNewGroupManagerName} />
                         </Form.Field>
                         <Form.Field>
-                            <Button onClick={this.createNewGroup}>Create</Button>
+                            <Button onClick={this.createNewGroup} loading={this.state.loading} disabled={this.state.loading}>Create</Button>
                         </Form.Field>
                     </Form>
                 );
@@ -148,7 +181,7 @@ class ManageGroupModal extends Component {
                             <Input placeholder='Group you want to join' onChange={this.setGroupAddressToJoin} />
                         </Form.Field>
                         <Form.Field>
-                            <Button onClick={this.joinGroup}>Join</Button>
+                            <Button onClick={this.joinGroup} loading={this.state.loading} disabled={this.state.loading}>Join</Button>
                         </Form.Field>
                     </Form>
                 );
@@ -168,8 +201,8 @@ class ManageGroupModal extends Component {
                                 <Input placeholder='Name you would like to change to' onChange={this.setEditedGroupName} value={this.state.editedGroupName} />
                             </Form.Field>
                             <Form.Field>
-                                <Button onClick={this.editGroupName}>Edit</Button>
-                                <Button onClick={this.leaveGroup}>Leave</Button>
+                                <Button onClick={this.editGroupName} loading={this.state.loading} disabled={this.state.loading}>Edit</Button>
+                                <Button onClick={this.leaveGroup} loading={this.state.loading} disabled={this.state.loading}>Leave</Button>
                             </Form.Field>
                         </Form>
 
@@ -191,7 +224,7 @@ class ManageGroupModal extends Component {
                                     defaultValue={"View"} />
                             </Form.Field>
                             <Form.Field>
-                                <Button onClick={this.addNewMember}>Add</Button>
+                                <Button onClick={this.addNewMember} loading={this.state.loading} disabled={this.state.loading}>Add</Button>
                             </Form.Field>
                         </Form>
 
@@ -222,12 +255,12 @@ class ManageGroupModal extends Component {
                                                         }}
                                                         options={[{ text: "View", value: "View" }, { text: "Admin", value: "Admin" }]}
                                                         defaultValue={member.permission} />
-                                                    <Button type="submit">Edit</Button>
+                                                    <Button loading={this.state.loading} disabled={this.state.loading} type="submit">Edit</Button>
                                                 </Form>
                                             </Table.HeaderCell>
                                             <Table.HeaderCell >
-                                                <Button onClick={(event) => { this.removeMember(i, member.address) }}>Remove</Button>
-                                                <Button onClick={(event) => { this.transferManager(member.address) }}>Transfer</Button>
+                                                <Button loading={this.state.loading} disabled={this.state.loading} onClick={(event) => { this.removeMember(i, member.address) }}>Remove</Button>
+                                                <Button loading={this.state.loading} disabled={this.state.loading} onClick={(event) => { this.transferManager(member.address) }}>Transfer</Button>
                                             </Table.HeaderCell>
                                         </Table.Row>
                                     );

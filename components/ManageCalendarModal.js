@@ -17,6 +17,24 @@ class ManageCalendarModal extends Component {
         joinedCalendarCooperators: this.props.getSelectedCalendarCooperators(),
         editingPermission: {},
         newCooperatorPermission: "View",
+        loading: false,
+    }
+
+    doLoading = async (func) => {
+        this.setState({ loading: true });
+        try {
+            const res = await func()
+            if (res?.status ?? true) {
+                window.alert('Transaction Success, refreshing the web page')
+                location.reload()
+            }else{
+                window.alert('Transaction Failed')
+            }
+        } catch (err) {
+            window.alert('Transaction Failed: ' + err?.message ?? err)
+        } finally {
+            this.setState({ loading: false });
+        }
     }
 
     refreshState = async () => {
@@ -58,52 +76,83 @@ class ManageCalendarModal extends Component {
 
     createNewCalendar = async () => {
         if (this.state.newCalendarName && this.state.newCalendarManagerName) {
-            this.setState({ open: false });
-            await createCalendar(this.state.newCalendarName, this.state.newCalendarManagerName, this.props.getDonateVolume() || 0);
-            await this.props.refreshJoinedCalendars();
+            await this.doLoading(async () => {
+                const result = await createCalendar(this.state.newCalendarName, this.state.newCalendarManagerName, this.props.getDonateVolume() || 0);
+                await this.props.refreshJoinedCalendars();
+                this.setState({ open: false });
+                return result
+            })
+
+
         }
     }
     joinCalendar = async () => {
         if (this.state.calendarAddressToJoin) {
-            this.setState({ open: false });
-            await addCalendar(this.state.calendarAddressToJoin);
-            await this.props.refreshJoinedCalendars();
+            await this.doLoading(async () => {
+                const result = await addCalendar(this.state.calendarAddressToJoin);
+                await this.props.refreshJoinedCalendars();
+                this.setState({ open: false });
+                return result
+            })
+
+
         }
     }
     editCalendarName = async () => {
         if (this.state.editedCalendarName) {
-            this.setState({ open: false });
-            const result = await updateCalendarTitle(this.state.selectedCalendar.address, this.state.editedCalendarName, this.props.getSelectedGroup().address);
-            await this.props.refreshJoinedCalendars();
+            await this.doLoading(async () => {
+                const result = await updateCalendarTitle(this.state.selectedCalendar.address, this.state.editedCalendarName, this.props.getSelectedGroup().address);
+                await this.props.refreshJoinedCalendars();
+                this.setState({ open: false });
+                return result
+            })
         }
     }
     leaveCalendar = async () => {
-        this.setState({ open: false });
-        const result = await leaveCalendar(this.state.selectedCalendar.index);
-
-        await this.props.refreshJoinedCalendars();
+        await this.doLoading(async () => {
+            const result = await leaveCalendar(this.state.selectedCalendar.index);
+            await this.props.refreshJoinedCalendars();
+            this.setState({ open: false });
+            return result
+        })
+        
     }
     addNewCooperator = async () => {
         if (this.state.newCooperatorName && this.state.newCooperatorAddress) {
-            const result = await addCooperator(this.state.selectedCalendar.address, this.state.newCooperatorAddress, this.state.newCooperatorPermission, this.state.newCooperatorName, this.props.getSelectedGroup().address);
-            await this.props.getSelectedCalendarCooperators();
+            await this.doLoading(async () => {
+                const result = await addCooperator(this.state.selectedCalendar.address, this.state.newCooperatorAddress, this.state.newCooperatorPermission, this.state.newCooperatorName, this.props.getSelectedGroup().address);
+                await this.props.getSelectedCalendarCooperators();
+                return result
+            })
+            
         }
     }
     updateCooperatorName = async (event, address) => {
         const newName = event.target.cooperatorName.value;
         const newPermission = this.state.editingPermission[address];
         if (newName && newPermission) {
-            await updateCooperator(this.state.selectedCalendar.address, address, newName, newPermission, this.props.getSelectedGroup().address);
-            await this.props.getSelectedCalendarCooperators();
+            await this.doLoading(async () => {
+                const res = await updateCooperator(this.state.selectedCalendar.address, address, newName, newPermission, this.props.getSelectedGroup().address);
+                await this.props.getSelectedCalendarCooperators();
+                return res
+            })
+            
         }
     }
     removeCooperator = async (i, address) => {
-        await deleteCooperator(this.state.selectedCalendar.address, i, address);
-        await this.props.getSelectedCalendarCooperators();
+        await this.doLoading(async () => {
+            const res = await deleteCooperator(this.state.selectedCalendar.address, i, address);
+            await this.props.getSelectedCalendarCooperators();
+            return res
+        })
+        
     }
 
     transferManager = async (address) => {
-        await changeManager(this.state.selectedCalendar.address, address);
+        await this.doLoading(async () => {
+            return await changeManager(this.state.selectedCalendar.address, address);
+        })
+        
     }
 
     componentDidMount = async () => {
@@ -126,7 +175,7 @@ class ManageCalendarModal extends Component {
                             <Input placeholder='Your identity' onChange={this.setNewCalendarManagerName} />
                         </Form.Field>
                         <Form.Field>
-                            <Button onClick={this.createNewCalendar}>Create</Button>
+                            <Button onClick={this.createNewCalendar} loading={this.state.loading} disabled={this.state.loading}>Create</Button>
                         </Form.Field>
                     </Form>
                 );
@@ -143,7 +192,7 @@ class ManageCalendarModal extends Component {
                             <Input placeholder='Calendar you want to join' onChange={this.setCalendarAddressToJoin} />
                         </Form.Field>
                         <Form.Field>
-                            <Button onClick={this.joinCalendar}>Join</Button>
+                            <Button onClick={this.joinCalendar} loading={this.state.loading} disabled={this.state.loading}>Join</Button>
                         </Form.Field>
                     </Form>
                 );
@@ -162,8 +211,8 @@ class ManageCalendarModal extends Component {
                                 <Input placeholder='Name you would like to change to' onChange={this.setEditedCalendarName} value={this.state.editedCalendarName} />
                             </Form.Field>
                             <Form.Field>
-                                <Button onClick={this.editCalendarName}>Edit</Button>
-                                <Button onClick={this.leaveCalendar}>Leave</Button>
+                                <Button onClick={this.editCalendarName} loading={this.state.loading} disabled={this.state.loading}>Edit</Button>
+                                <Button onClick={this.leaveCalendar} loading={this.state.loading} disabled={this.state.loading}>Leave</Button>
                             </Form.Field>
                         </Form>
 
@@ -185,7 +234,7 @@ class ManageCalendarModal extends Component {
                                     defaultValue={"View"} />
                             </Form.Field>
                             <Form.Field>
-                                <Button onClick={this.addNewCooperator}>Add</Button>
+                                <Button onClick={this.addNewCooperator} loading={this.state.loading} disabled={this.state.loading}>Add</Button>
                             </Form.Field>
                         </Form>
 
@@ -216,12 +265,12 @@ class ManageCalendarModal extends Component {
                                                         }}
                                                         options={[{ text: "View", value: "View" }, { text: "Admin", value: "Admin" }]}
                                                         defaultValue={cooperator.permission} />
-                                                    <Button type="submit">Edit</Button>
+                                                    <Button type="submit" loading={this.state.loading} disabled={this.state.loading}>Edit</Button>
                                                 </Form>
                                             </Table.HeaderCell>
                                             <Table.HeaderCell >
-                                                <Button onClick={(event) => { this.removeCooperator(i, cooperator.address) }}>Remove</Button>
-                                                <Button onClick={(event) => { this.transferManager(cooperator.address) }}>Transfer</Button>
+                                                <Button onClick={(event) => { this.removeCooperator(i, cooperator.address) }} loading={this.state.loading} disabled={this.state.loading}>Remove</Button>
+                                                <Button onClick={(event) => { this.transferManager(cooperator.address) }} loading={this.state.loading} disabled={this.state.loading}>Transfer</Button>
                                             </Table.HeaderCell>
                                         </Table.Row>
                                     );
