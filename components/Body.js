@@ -26,7 +26,7 @@ class Body extends Component {
 
     doLoading = async (func) => {
 
-        if (this.props.getSelectedCalendar().address === ''){
+        if (this.props.getSelectedCalendar().address === '') {
             window.alert('please select a calendar first')
         }
 
@@ -35,7 +35,7 @@ class Body extends Component {
             const res = await func()
             if (res?.status ?? true) {
                 window.alert('Transaction Success')
-            }else{
+            } else {
                 window.alert('Transaction Failed')
             }
         } catch (err) {
@@ -116,6 +116,16 @@ class Body extends Component {
         })
     }
 
+    updateEventList = async (newDate) => {
+        await this.doLoading(async () => {
+            const MM = newDate.getMonth();
+            const YYYY = newDate.getFullYear();
+            const monthTimestamp = +new Date(YYYY, MM, 1);
+            await this.props.refreshEvents(monthTimestamp);
+            this.setState({ events: this.props.getEvents() });
+        })
+    }
+
     render = () => {
         const localizer = momentLocalizer(moment);
         return (
@@ -128,6 +138,7 @@ class Body extends Component {
                     onSelectEvent={this.handleSelectEvent}
                     onSelectSlot={this.handleSelectSlot}
                     selectable
+                    onNavigate={this.updateEventList}
                 />
                 <Modal
                     style={{ top: "15%" }}
@@ -180,10 +191,10 @@ class Body extends Component {
                             <Label size="large" style={{ marginTop: "1em" }}>Description</Label><br />
                             <TextArea onChange={(event) => { this.setState({ selectedEventDescription: event.target.value }) }} value={this.state.selectedEventDescription} />
                             <br />
-                            <Button onClick={this.updateSelectedEvent}  loading={this.state.loading} disabled={this.state.loading}>
+                            <Button onClick={this.updateSelectedEvent} loading={this.state.loading} disabled={this.state.loading}>
                                 Update
                             </Button>
-                            <Button onClick={this.removeSelectedEvent}  loading={this.state.loading} disabled={this.state.loading}>
+                            <Button onClick={this.removeSelectedEvent} loading={this.state.loading} disabled={this.state.loading}>
                                 Remove
                             </Button>
                         </Container>
