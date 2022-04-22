@@ -19,6 +19,9 @@
     "dev": "next dev",
     "test": "mocha",
     "compile": "node ./ethereum/compile.js",
-    "deploy": "node ./ethereum/deploy.js"
+    "deploy": "node ./ethereum/deploy.js",
+    "export": "next export",
+    "build": "next build",
+    "start": "next start"
   }
 }
