@@ -22,28 +22,29 @@ class Body extends Component {
         selectedEventId: 0,
         isManageEventModalOpen: false,
         loading: false,
+        currentDate: new Date(),
     }
 
     doLoading = async (func) => {
 
         if (this.props.getSelectedCalendar().address === '') {
             window.alert('please select a calendar first')
-        }
+        } else {
 
-        this.setState({ loading: true });
-        try {
-            const res = await func()
-            if (res?.status ?? true) {
-                window.alert('Transaction Success')
-            } else {
-                window.alert('Transaction Failed')
+            this.setState({ loading: true });
+            try {
+                const res = await func()
+                if (res?.status ?? true) {
+                    window.alert('Transaction Success')
+                } else {
+                    window.alert('Transaction Failed')
+                }
+            } catch (err) {
+                window.alert('Transaction Failed: ' + err?.message ?? err)
+            } finally {
+                this.setState({ loading: false });
             }
-        } catch (err) {
-            window.alert('Transaction Failed: ' + err?.message ?? err)
-        } finally {
-            this.setState({ loading: false });
         }
-
     }
 
     handleSelectEvent = (event) => {
@@ -81,7 +82,7 @@ class Body extends Component {
                 +this.state.newEventStart, +this.state.newEventEnd, this.state.newEventTitle,
                 this.state.newEventDescription, this.props.getSelectedGroup().address);
             await this.props.refreshEvents(monthTimestamp);
-            this.setState({ events: this.props.getEvents(), isManageEventModalOpen: false });
+            this.setState({ events: this.props.getEvents(), isCreateEventModalOpen: false });
             return result
         })
     }
@@ -117,13 +118,13 @@ class Body extends Component {
     }
 
     updateEventList = async (newDate) => {
-        await this.doLoading(async () => {
-            const MM = newDate.getMonth();
-            const YYYY = newDate.getFullYear();
-            const monthTimestamp = +new Date(YYYY, MM, 1);
-            await this.props.refreshEvents(monthTimestamp);
-            this.setState({ events: this.props.getEvents() });
-        })
+
+        const MM = newDate.getMonth();
+        const YYYY = newDate.getFullYear();
+        const monthTimestamp = +new Date(YYYY, MM, 1);
+        await this.props.refreshEvents(monthTimestamp);
+        this.setState({ events: this.props.getEvents(), currentDate: new Date(monthTimestamp) });
+        console.log(this.state.currentDate);
     }
 
     render = () => {
@@ -138,6 +139,7 @@ class Body extends Component {
                     onSelectEvent={this.handleSelectEvent}
                     onSelectSlot={this.handleSelectSlot}
                     selectable
+                    date={this.state.currentDate}
                     onNavigate={this.updateEventList}
                 />
                 <Modal
