@@ -28,3 +28,6 @@ UI component:
 1. https://react.semantic-ui.com/
 2. https://github.com/jquense/react-big-calendar
 3. https://www.npmjs.com/package/react-datetime-picker
+
+# Github page
+1. https://github.com/gregrickaby/nextjs-github-pages
