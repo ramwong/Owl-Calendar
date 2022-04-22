@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { Grid, Image, Label, Input } from 'semantic-ui-react';
-import logo from './images/githubLogo.png';
 class Footer extends Component {
 
     setVolume = (event) => {
