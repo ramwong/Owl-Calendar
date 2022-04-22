@@ -19,7 +19,8 @@ const provider = new HDWalletProvider(
     // "https://mainnet.infura.io/v3/36d64c099c50404692eb8be07f68db77"  // for production
 );
 ```
-2. if you updated the contracts source file (./ethereum/contracts/E-timetable.sol), run `npm run compile`
+2. if you updated the contracts source file (./ethereum/contracts/E-timetable.sol), run 
+`npm run compile`
 3. `npm run deploy`
 
 
