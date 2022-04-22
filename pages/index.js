@@ -36,11 +36,11 @@ class CalendarIndex extends Component {
     }
 
     setSelectedGroup = async (name, address, index) => {
-        await this.refreshJoinedCalendars();
         this.setState({
             selectedGroup: { name: name, address: address, index: index },
             selectedCalendar: { title: "Select Calendar", address: "", }
         });
+        await this.refreshJoinedCalendars();
     }
 
     setSelectedCalendar = async (title, address, index) => {
@@ -115,7 +115,7 @@ class CalendarIndex extends Component {
         this.setState({ getGroupsError: { message: "", error: false }, loading: true })
         // get Events
         const getEventsResult = await getEvents(this.state.selectedCalendar.address, monthTimestamp, this.state.selectedGroup.address);
-        
+
         if (getEventsResult.status) {
             const { eventStartTimestamps, eventEndTimestamps, titles,
                 descriptions, indexes, } = getEventsResult.result;
@@ -126,7 +126,7 @@ class CalendarIndex extends Component {
                     end: new Date(+eventEndTimestamps[i]), description: descriptions[i]
                 });
             }
-            this.setState({ events: tempEvents, update:!this.state.update });
+            this.setState({ events: tempEvents, update: !this.state.update });
         }
     }
 
