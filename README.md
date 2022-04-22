@@ -29,5 +29,5 @@ UI component:
 2. https://github.com/jquense/react-big-calendar
 3. https://www.npmjs.com/package/react-datetime-picker
 
-Github page
+Github page:
 1. https://github.com/gregrickaby/nextjs-github-pages
