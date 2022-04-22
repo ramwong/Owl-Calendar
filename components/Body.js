@@ -110,9 +110,9 @@ class Body extends Component {
                     <Modal.Content>
                         <Container>
                             <Label size="large">Start:</Label>
-                            <DateTimePicker onChange={() => this.setState({ newEventStart: value })} value={this.state.newEventStart} />
+                            <DateTimePicker onChange={(value) => this.setState({ newEventStart: value })} value={this.state.newEventStart} />
                             <Label size="large">End:</Label>
-                            <DateTimePicker onChange={() => this.setState({ newEventEnd: value })} value={this.state.newEventEnd} />
+                            <DateTimePicker onChange={(value) => this.setState({ newEventEnd: value })} value={this.state.newEventEnd} />
                             <br />
                             <Label size="large" style={{ marginTop: "1em" }}>Title</Label>
                             <Input onChange={(event) => { this.setState({ newEventTitle: event.target.value }) }} />
@@ -139,7 +139,7 @@ class Body extends Component {
                     <Modal.Content>
                         <Container>
                             <Label size="large">Start:</Label>
-                            <DateTimePicker onChange={() => this.setState({ selectedEventStart: value })} value={this.state.selectedEventStart} />
+                            <DateTimePicker onChange={(event) => this.setState({ selectedEventStart: value })} value={this.state.selectedEventStart} />
                             <Label size="large">End:</Label>
                             <DateTimePicker onChange={() => this.setState({ selectedEventEnd: value })} value={this.state.selectedEventEnd} />
                             <br />
