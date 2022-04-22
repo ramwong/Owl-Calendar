@@ -24,15 +24,23 @@ const provider = new HDWalletProvider(
 3. `npm run deploy`
 
 # How to use
+Use Group:
+- skip 1-3 if you already had/joined a group
+1. Click "Manage Group"
+2. create a new Group or join a existing Group
+3. After transaction complete, refresh the page
+4. select joined group
+5. Use canledar
+
 Use Calendar:
-1. Click create "Manager Calendar"
+- skip 1-3 if you already had/joined a calendar
+- not a must to use with group
+1. Click "Manage Calendar"
 2. create a new Calendar or join a existing Calendar
 3. After transaction complete, refresh the page
 4. select joined calednar
 5. click on the date you want to add event
 6. fill and click create button
-
-
 
 # References
 UI component:
