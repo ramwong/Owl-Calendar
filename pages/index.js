@@ -126,7 +126,6 @@ class CalendarIndex extends Component {
                     end: new Date(+eventEndTimestamps[i]), description: descriptions[i]
                 });
             }
-            console.log(tempEvents);
             this.setState({ events: tempEvents, update:!this.state.update });
         }
     }

@@ -57,13 +57,11 @@ class Body extends Component {
         const result = await addEvent(this.props.getSelectedCalendar().address, monthTimestamp,
             +this.state.newEventStart, +this.state.newEventEnd, this.state.newEventTitle,
             this.state.newEventDescription, this.props.getSelectedGroup().address);
-        console.log(result);
         await this.props.refreshEvents(monthTimestamp);
         this.setState({ events: this.props.getEvents(), isManageEventModalOpen: false });
     }
     componentDidMount = async () => {
         await this.setState({ events: this.props.getEvents(), })
-        console.log(this.state.events);
     }
 
     updateSelectedEvent = async () => {
@@ -73,7 +71,6 @@ class Body extends Component {
         const result = await updateEvent(this.props.getSelectedCalendar().address, monthTimestamp, this.state.selectedEventId,
             +this.state.selectedEventStart, +this.state.selectedEventEnd,
             this.state.selectedEventTitle, this.state.selectedEventDescription, this.props.getSelectedGroup().address);
-        console.log(result);
         await this.props.refreshEvents(monthTimestamp);
         this.setState({ events: this.props.getEvents(), isManageEventModalOpen: false });
     }
@@ -84,7 +81,6 @@ class Body extends Component {
         const monthTimestamp = +new Date(YYYY, MM, 1);
         const result = await deleteEvent(this.props.getSelectedCalendar().address, monthTimestamp,
             this.state.selectedEventId, this.props.getSelectedGroup.address);
-        console.log(result);
         await this.props.refreshEvents(monthTimestamp);
         this.setState({ events: this.props.getEvents(), isManageEventModalOpen: false });
     }

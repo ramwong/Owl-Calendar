@@ -82,8 +82,6 @@ export const getEvents = async (calendar, monthTimestamp, selectedGroupAddress) 
 
 export const updateEvent = async (calendar, monthTimestamp, index, eventStartTimestamp, eventEndTimestamp,
     title, description, selectedGroupAddress) => {
-    console.log(calendar, monthTimestamp, index, eventStartTimestamp, eventEndTimestamp,
-        title, description, selectedGroupAddress);
     // check not null
     if (calendar && monthTimestamp && eventStartTimestamp && eventEndTimestamp && title && description) {
         // get selected account

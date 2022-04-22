@@ -74,7 +74,6 @@ class ManageCalendarModal extends Component {
         if (this.state.editedCalendarName) {
             this.setState({ open: false });
             const result = await updateCalendarTitle(this.state.selectedCalendar.address, this.state.editedCalendarName, this.props.getSelectedGroup().address);
-            console.log(result);
             await this.props.refreshJoinedCalendars();
         }
     }
@@ -85,19 +84,14 @@ class ManageCalendarModal extends Component {
         await this.props.refreshJoinedCalendars();
     }
     addNewCooperator = async () => {
-        console.log(this.state.newCooperatorName)
-        console.log(this.state.newCooperatorAddress)
         if (this.state.newCooperatorName && this.state.newCooperatorAddress) {
             const result = await addCooperator(this.state.selectedCalendar.address, this.state.newCooperatorAddress, this.state.newCooperatorPermission, this.state.newCooperatorName, this.props.getSelectedGroup().address);
-            console.log(result)
             await this.props.getSelectedCalendarCooperators();
         }
     }
     updateCooperatorName = async (event, address) => {
         const newName = event.target.cooperatorName.value;
         const newPermission = this.state.editingPermission[address];
-        console.log(newName);
-        console.log(newPermission);
         if (newName && newPermission) {
             await updateCooperator(this.state.selectedCalendar.address, address, newName, newPermission, this.props.getSelectedGroup().address);
             await this.props.getSelectedCalendarCooperators();

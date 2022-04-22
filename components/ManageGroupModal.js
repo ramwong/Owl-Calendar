@@ -20,7 +20,6 @@ class ManageGroupModal extends Component {
     }
 
     refreshState = async () => {
-        console.log(223);
         this.setState(
             {
                 selectedGroup: this.props.getSelectedGroup(),
