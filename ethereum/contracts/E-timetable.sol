@@ -350,7 +350,7 @@ contract Group{
 }
 
 
-contract groupFactory{
+contract GroupFactory{
     // variables of a Calendar instance
     mapping(address=>address[]) private groups;
     address payable public manager;
