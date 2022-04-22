@@ -4,6 +4,9 @@ Metamask: https://metamask.io/
 
 Get some coin in test network: https://faucets.chain.link/
 
+## Example
+https://ramwong.github.io/431/
+
 # Run
 1. Get npm: https://nodejs.org/en/
 2. cd into extracted folder which contains file "package.json"
