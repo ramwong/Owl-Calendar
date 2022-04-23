@@ -230,7 +230,7 @@ class ManageCalendarModal extends Component {
                             <Form.Field>
                                 <Dropdown style={{ marginLeft: "1em" }}
                                     onChange={this.setNewCooperatorPermission}
-                                    options={[{ text: "View", value: "View" }, { text: "Admin", value: "Admin" }]}
+                                    options={[{ text: "View", value: "View" }, { text: "Edit", value: "Edit" }, { text: "Admin", value: "Admin" }]}
                                     defaultValue={"View"} />
                             </Form.Field>
                             <Form.Field>
@@ -263,7 +263,7 @@ class ManageCalendarModal extends Component {
                                                                 editingPermission: { ...(this.state.editingPermission), ...(addressPermission) }
                                                             })
                                                         }}
-                                                        options={[{ text: "View", value: "View" }, { text: "Admin", value: "Admin" }]}
+                                                        options={[{ text: "View", value: "View" }, { text: "Edit", value: "Edit" }, { text: "Admin", value: "Admin" }]}
                                                         defaultValue={cooperator.permission} />
                                                     <Button type="submit" loading={this.state.loading} disabled={this.state.loading}>Edit</Button>
                                                 </Form>
