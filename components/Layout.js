@@ -8,6 +8,7 @@ class Layout extends Component {
         return (
             <Container>
                 <Head>
+                    <title>Owl Calendar</title>
                     <link rel="stylesheet"
                         href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.12/semantic.min.css" />
                 </Head>
