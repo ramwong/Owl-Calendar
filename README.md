@@ -5,7 +5,7 @@ Metamask: https://metamask.io/
 Get some coin in test network: https://faucets.chain.link/
 
 ## Example
-https://ramwong.github.io/431/
+https://ramwong.github.io/Owl-Calendar/
 
 # Run
 1. Get npm: https://nodejs.org/en/
@@ -27,23 +27,21 @@ const provider = new HDWalletProvider(
 3. `npm run deploy`
 
 # How to use
-Use Group:
-- skip 1-3 if you already had/joined a group
-1. Click "Manage Group"
-2. create a new Group or join a existing Group
-3. After transaction complete, refresh the page
-4. select joined group
-5. Use canledar
-
 Use Calendar:
 - skip 1-3 if you already had/joined a calendar
 - not a must to use with group
 1. Click "Manage Calendar"
 2. create a new Calendar or join a existing Calendar
-3. After transaction complete, refresh the page
-4. select joined calednar
-5. click on the date you want to add event
-6. fill and click create button
+3. select joined calednar
+4. click on the date you want to add event
+5. fill and click create button
+
+Use Group:
+- skip 1-3 if you already had/joined a group
+1. Click "Manage Group"
+2. create a new Group or join a existing Group
+3. select joined group
+4. Use canledar
 
 # References
 UI component:
