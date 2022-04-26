@@ -12,6 +12,7 @@ https://ramwong.github.io/Owl-Calendar/
 2. cd into extracted folder which contains file "package.json"
 3. npm install
 4. npm run dev
+5. browser http://localhost:3000
 
 # If you want to deploy your own
 1. update ./ethereum/deploy.js
